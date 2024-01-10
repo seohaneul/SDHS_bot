@@ -12,15 +12,31 @@ router.post("/", function (req, res, next) {
   const menu = {
     //2
     type: "buttons",
-    buttons: ["학교 소개", "급식 정보"],
+    buttons: ["학과 소개", "급식 정보"],
   };
   var res_object; //3
   if (object.type == "text") {
-    if (object.content == "학교 소개") {
+    if (object.content == "학과 소개") {
       //4
       res_object = {
         message: {
-          text: "서울디지텍고등학교",
+          text: `서울디지텍고등학교 학과 📖
+
+          ○ 1학년
+               • 게임융합계열
+                 - 게임융합공통과정
+          
+          ○ 2학년
+               • 게임개발과
+                  - 게임 프로그래밍 과정
+                  - 게임 그래픽(2D/3D) 과정
+          
+               • 인공지능소프트웨어과
+               • 빅데이터과
+                  - 공간정보 소프트웨어 개발과정
+                  - 인공지능 프로그램 과정
+                  - 인공지능 / 빅데이터 과정
+          `,
         },
         keyboard: menu,
       };
