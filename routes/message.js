@@ -9,11 +9,6 @@ router.post("/", function (req, res, next) {
     type: req.body.type, // user가 보낸 message의 형태. text , photo로 이루어짐
     content: req.body.content, // user가 보낸 메시지 내용.
   };
-  const menu = {
-    //2
-    type: "buttons",
-    buttons: ["학과 소개", "급식 정보"],
-  };
   var res_object; //3
   if (object.type == "text") {
     if (object.content == "학과 소개") {
@@ -37,21 +32,6 @@ router.post("/", function (req, res, next) {
                   - 인공지능 프로그램 과정
                   - 인공지능 / 빅데이터 과정
           `,
-        },
-        keyboard: menu,
-      };
-    } else if (object.content == "급식 정보") {
-      //5
-      res_object = {
-        message: {
-          text: "맛 없는거",
-        },
-        keyboard: menu,
-      };
-    } else {
-      res_object = {
-        message: {
-          text: object.content,
         },
         keyboard: menu,
       };

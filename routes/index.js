@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
-  res.render("index", { title: "Express" });
+  location.replace("https://sdh.sen.hs.kr/198663/subMenu.do");
 });
 
 module.exports = router;
