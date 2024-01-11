@@ -1,193 +1,41 @@
-const express = require("express");
-const app = express();
-const logger = require("morgan");
-const bodyParser = require("body-parser");
-const School = require("node-school-kr");
-const school = new School();
-const moment = require("moment");
-require("moment-timezone");
-moment.tz.setDefault("Asia/Seoul");
-
-// console.log(school.search(School.Region.GYEONGGI, "서울디지텍고등학교"));
-
-const allowCrossDomain = function (req, res, next) {
-  // CORS 처리
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Content-Length, X-Requested-With"
-  );
-
-  if ("OPTIONS" == req.method) {
-    res.send(200);
-  } else {
-    next();
+function response(
+  room,
+  msg,
+  sender,
+  isGroupChat,
+  replier,
+  ImageDB,
+  packageName
+) {
+  var cmd = msg.split(" ");
+  if (cmd[0] == "/급식") {
+    var data = Utils.parse(
+      "https://m.search.naver.com/search.naver?query=" + cmd[1] + "%20급식"
+    );
+    data = data.select("ul.list_scroll.menu_scroll").select("li.bx_list._item");
+    var day = new Date();
+    var today = day.getMonth() + 1 + "월 " + day.getDate() + "일";
+    var result = [];
+    for (var n = 0; n < data.size(); n++) {
+      var datum = data.get(n);
+      var date = datum.select("strong").text();
+      if (date.startsWith(today)) {
+        var meal =
+          "---" +
+          date +
+          "---\n" +
+          datum
+            .select("ul")
+            .select("li")
+            .text()
+            .replace(/[0-9.]/g, "")
+            .replace(/ /g, "\n");
+        if (date.includes("아침")) result[0] = meal;
+        if (date.includes("점심")) result[1] = meal;
+        if (date.includes("저녁")) result[2] = meal;
+      }
+    }
+    result = result.join("\n\n").trim();
+    replier.reply(result ? result : "학교 또는 급식 정보를 찾을 수 없어요.");
   }
-};
-
-let year;
-let month;
-let day;
-let se;
-const getDate = () => {
-  let date = moment();
-  year = date.format("YYYY");
-  month = date.format("MM");
-  day = date.format("DD");
-  se = date.format("ss");
-};
-let meal = "";
-const example = async function () {
-  getDate();
-  school.init(School.Type.HIGH, School.Region.SEOUL, "B100000659");
-
-  meal = await school.getMeal({
-    year: year,
-    month: month,
-    default: "급식이 없습니다",
-  });
-};
-example();
-
-const apiRouter = express.Router();
-app.use(allowCrossDomain);
-app.use(logger("dev", {}));
-app.use(bodyParser.json());
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
-
-app.use("/api", apiRouter);
-
-apiRouter.get("/test", function (req, res) {
-  res.send("Hello");
-});
-
-apiRouter.get("/today", function (req, res) {
-  getDate();
-  if (Number(day) < 10) day = day.substring(1);
-  let str = meal[day] == null ? "급식이 없습니다" : meal[day];
-  str = str.replace("&amp;", "\n");
-  const responseBody = {
-    version: "2.0",
-    template: {
-      outputs: [
-        {
-          simpleText: {
-            text: str,
-          },
-        },
-      ],
-    },
-  };
-
-  res.status(200).send(responseBody);
-});
-
-apiRouter.post("/today", function (req, res) {
-  getDate();
-  if (Number(day) < 10) day = day.substring(1);
-  let str = meal[day] == null ? "급식이 없습니다" : meal[day];
-  str = str.replace("&amp;", "\n");
-  const responseBody = {
-    version: "2.0",
-    template: {
-      outputs: [
-        {
-          simpleText: {
-            text: str,
-          },
-        },
-      ],
-    },
-  };
-
-  res.status(200).send(responseBody);
-});
-
-apiRouter.post("/tomorrow", function (req, res) {
-  getDate();
-  var day1 = moment().add(1, "days").format("DD");
-  if (Number(day1) - Number(day) !== 1) {
-    const responseBody = {
-      version: "2.0",
-      template: {
-        outputs: [
-          {
-            simpleText: {
-              text: "내일급식은 달이 달라져서 지원되지 않습니다",
-            },
-          },
-        ],
-      },
-    };
-
-    res.status(200).send(responseBody);
-  } else {
-    if (Number(day1) < 10) day1 = day1.substring(1);
-    let str = meal[day1] == null ? "급식이 없습니다" : meal[day1];
-    str = str.replace("&amp;", "\n");
-    const responseBody = {
-      version: "2.0",
-      template: {
-        outputs: [
-          {
-            simpleText: {
-              text: str,
-            },
-          },
-        ],
-      },
-    };
-
-    res.status(200).send(responseBody);
-  }
-});
-
-apiRouter.get("/tomorrow", function (req, res) {
-  getDate();
-  var day1 = moment().add(1, "days").format("DD");
-  if (Number(day1) - Number(day) !== 1) {
-    const responseBody = {
-      version: "2.0",
-      template: {
-        outputs: [
-          {
-            simpleText: {
-              text: "내일급식은 달이 달라져서 지원되지 않습니다",
-            },
-          },
-        ],
-      },
-    };
-
-    res.status(200).send(responseBody);
-  } else {
-    if (Number(day1) < 10) day1 = day1.substring(1);
-    let str = meal[day1] == null ? "급식이 없습니다" : meal[day1];
-    str = str.replace("&amp;", "\n");
-    const responseBody = {
-      version: "2.0",
-      template: {
-        outputs: [
-          {
-            simpleText: {
-              text: str,
-            },
-          },
-        ],
-      },
-    };
-
-    res.status(200).send(responseBody);
-  }
-});
-
-// 서버 구동
-var port = process.env.PORT || 3000;
-app.listen(port, function () {
-  console.log("server on");
-});
+}
