@@ -1,4 +1,5 @@
 const express = require("express");
+require("dotenv").config();
 const app = express();
 
 app.use(express.urlencoded({ extended: false }));
@@ -37,4 +38,6 @@ app.post("/message", (req, res) => {
   res.json(data);
 });
 
-app.listen(3000, () => console.log("node on 3000"));
+app.listen(process.env.PORT || 3000, () =>
+  console.log("node on " + process.env.PORT)
+);
