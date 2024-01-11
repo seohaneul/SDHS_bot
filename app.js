@@ -1,58 +1,40 @@
-function response(
-  room,
-  msg,
-  sender,
-  isGroupChat,
-  replier,
-  imageDB,
-  packageName
-) {
-  if (msg == "/급식") {
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = now.getMonth();
-    var date = now.getDate();
-    month += 1;
-    month = String(month);
-    date = String(date);
-    if (month.length == 1) {
-      month = "0" + month;
-    }
-    if (date.length == 1) {
-      date = "0" + date;
-    }
-    var total = year + month + date;
-    var result = Utils.getWebText(
-      "https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=98a2543292c44d2cacb87a37122be55e&Type=json&plndex=1&pSize=1&ATPT_OFCDC_SC_CODE=B10&SD_SCHUL_CODE=7010572&MLSV_YMD=" +
-        total,
-      false,
-      false
-    )
-      .split("<body>")[1]
-      .split("</body>")[0];
+const express = require("express");
+const app = express();
 
-    try {
-      calories = result.split('CAL_INFO":"')[1].split('","NTR_INFO')[0];
-      result = result
-        .split('","ORPLC')[0]
-        .split('"DDISH_NM":"')[1]
-        .replace(/(<([^>]+)>)/g, "");
-      result = result.replace(/amp;/gi, "");
-      result = result.replace(/undefined/gi, "");
-      result = result.replace(/\./gi, "");
-      result = result.replace(/\*/gi, "");
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
-      result = result.trim();
-      result = result.replace(/^ +/gm, "");
+app.get("/keyboard", (req, res) => {
+  const data = { type: "text" };
+  res.json(data);
+});
 
-      result = result.replace(/[0-9]/g, "");
-    } catch (e) {
-      replier.reply("급식 정보가 없습니다");
-    }
+app.post("/message", (req, res) => {
+  const question = req.body.userRequest.utterance;
+  const goMain = "처음으로";
 
-    result += "\n";
-    result += "총 ";
-    result += calories;
-    replier.reply(result);
+  if (question === "테스트") {
+    const data = {
+      version: "2.0",
+      template: {
+        outputs: [
+          {
+            simpleText: {
+              text: "테스트",
+            },
+          },
+        ],
+        quickReplies: [
+          {
+            label: goMain,
+            action: "message",
+            messageText: goMain,
+          },
+        ],
+      },
+    };
   }
-}
+  res.json(data);
+});
+
+app.listen(3000, () => console.log("node on 3000"));
