@@ -2,13 +2,13 @@ const express = require("express");
 const app = express();
 const logger = require("morgan");
 const bodyParser = require("body-parser");
-const School = require("school-kr");
+const School = require("node-school-kr");
 const school = new School();
 const moment = require("moment");
 require("moment-timezone");
 moment.tz.setDefault("Asia/Seoul");
 
-console.log(school.search(School.Region.GYEONGGI, "서울디지텍고등학교"));
+// console.log(school.search(School.Region.GYEONGGI, "서울디지텍고등학교"));
 
 const allowCrossDomain = function (req, res, next) {
   // CORS 처리
