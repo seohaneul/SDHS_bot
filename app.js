@@ -1,74 +1,76 @@
 const express = require("express");
-require("dotenv").config();
+const axios = require("axios");
 const app = express();
 const logger = require("morgan");
+const bodyParser = require("body-parser");
+var today = new Date();
+
+var year = today.getFullYear();
+var month = ("0" + (today.getMonth() + 1)).slice(-2);
+var day = ("0" + today.getDate()).slice(-2);
+
+var now = year + month + day;
+console.log(now);
+
 const apiRouter = express.Router();
-const School = require("school-kr");
-const school = new School();
 
 app.use(logger("dev", {}));
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
 
 app.use("/api", apiRouter);
 
-apiRouter.post("/today", async (req, res) => {
+const api = () =>
+  fetch(
+    `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=98a2543292c44d2cacb87a37122be55e&Type=json&plndex=1&pSize=1&ATPT_OFCDC_SC_CODE=B10&SD_SCHUL_CODE=7010572&MLSV_YMD=${now}`
+  ).then((res) => res.json());
+
+apiRouter.get("/today", async function (req, res) {
+  const getData = await api();
+
+  console.log(getData.mealServiceDietInfo[1].row[0].DDISH_NM);
+
   const responseBody = {
     version: "2.0",
     template: {
       outputs: [
         {
           simpleText: {
-            text: "hello I'm Ryan",
+            text: "here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
           },
         },
       ],
     },
   };
-  //   const result = await school.search(School.Region.SEOUL, "서울디지텍고등학교");
-  //   school.init(School.Type.HIGH, School.Region.SEOUL, result[0].schoolCode);
 
-  //   const meal = await school.getMeal();
-  //   const calendar = await school.getCalendar();
-
-  //   // 오늘 날짜
-  //   console.log(`${meal.month}월 ${meal.day}일`);
-
-  //   // 오늘 급식 정보
-  //   console.log(meal.today);
-  //   const data = { menu: "맛있는거" };
-  //   res.json(data);
+  return res
+    .status(200)
+    .json({ message: getData.mealServiceDietInfo[1].row[0].DDISH_NM });
 });
 
-apiRouter.post("/tomorrow", async (req, res) => {
+apiRouter.get("/tomorrow", function (req, res) {
+  console.log(req.body);
+
   const responseBody = {
     version: "2.0",
     template: {
       outputs: [
         {
           simpleImage: {
-            imageUrl:
-              "https://t1.daumcdn.net/friends/prod/category/M001_friends_ryan2.jpg",
             altText: "hello I'm Ryan",
           },
         },
       ],
     },
   };
-  //   const result = await school.search(School.Region.SEOUL, "서울디지텍고등학교");
-  //   school.init(School.Type.HIGH, School.Region.SEOUL, result[0].schoolCode);
 
-  //   const meal = await school.getMeal();
-  //   const calendar = await school.getCalendar();
-
-  //   // 오늘 날짜
-  //   console.log(`${meal.month}월 ${meal.day}일`);
-
-  //   // 오늘 급식 정보
-  //   console.log(meal.today);
-  //   const data = { menu: "맛있는거" };
-  //   res.json(data);
+  res.status(200).send(responseBody);
 });
 
-app.listen(process.env.PORT || 3000, () =>
-  console.log("node on " + process.env.PORT)
-);
+app.listen(3000, function () {
+  console.log("Example skill server listening on port 3000!");
+});
