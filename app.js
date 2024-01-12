@@ -47,9 +47,18 @@ apiRouter.get("/today", async function (req, res) {
     },
   };
 
-  return res
-    .status(200)
-    .json({ message: getData.mealServiceDietInfo[1].row[0].DDISH_NM });
+  return res.status(200).json({
+    version: "2.0",
+    template: {
+      outputs: [
+        {
+          simpleText: {
+            text: getData.mealServiceDietInfo[1].row[0].DDISH_NM,
+          },
+        },
+      ],
+    },
+  });
 });
 
 apiRouter.get("/tomorrow", function (req, res) {
